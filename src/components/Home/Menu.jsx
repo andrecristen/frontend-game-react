@@ -15,7 +15,7 @@ const Menu = (props) => {
         <NavBar title="Bem-Vindo" id="menu">
             <NavItem title="Salas" route="/"></NavItem>
             <NavItem title="Minha Conta" route="/profile"></NavItem>
-            <button type="button" onClick={onClickLogout} className="btn btn-sm btn-danger">Sair</button>
+            <button type="button" onClick={onClickLogout} className="btn btn-sm btn-outline-danger">Sair</button>
         </NavBar>
     );
 }

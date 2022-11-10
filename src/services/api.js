@@ -12,4 +12,14 @@ export const auth = async (email, password) => {
         .catch((error) => {
             return error.response;
         });
-} 
+}
+
+export const create = async (user) => {
+    return api.post('/api/v1/user/', user)
+        .then((result) => {
+            return result;
+        })
+        .catch((error) => {
+            return error.response;
+        });
+}

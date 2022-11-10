@@ -8,10 +8,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSpinner } from '@fortawesome/free-solid-svg-icons'
 
 import "./styles.css"
+import { useNavigate } from "react-router-dom";
 
 const LoginPage = function () {
 
     const { authenticated, login } = useContext(AuthContext);
+
+    let navigate = useNavigate();
 
     const [validatingLogin, setValidatingLogin] = useState(false);
     const [email, setEmail] = useState("");
@@ -22,6 +25,10 @@ const LoginPage = function () {
         setValidatingLogin(true);
         await login(email, password);
         setValidatingLogin(false);
+    }
+
+    const onClickRegister = () => {
+        navigate("/register");
     }
 
     return (
@@ -64,12 +71,8 @@ const LoginPage = function () {
                                     Entrar {validatingLogin ? <FontAwesomeIcon icon={faSpinner} spin /> : ''}
                                 </button>
                                 <p
-                                    className="small fw-bold mt-2 pt-1 mb-0">
-                                    <a href="#!" className="link-danger">Não possui uma conta? Crie agora</a>
-                                </p>
-                                <p
-                                    className="small fw-bold mt-2 pt-1 mb-0">
-                                    <a href="#!" className="link-danger">Esqueci minha senha</a>
+                                    className="small fw-bold mt-2 pt-1 mb-0 text-center">
+                                    <button onClick={onClickRegister} className="btn link-danger">Não possui uma conta? Crie agora</button>
                                 </p>
                             </div>
 

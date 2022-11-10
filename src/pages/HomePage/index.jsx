@@ -1,4 +1,5 @@
 import Menu from "../../components/Home/Menu";
+import RoomList from "../../components/Room/RoomList";
 
 const HomePage = function () {
 
@@ -6,6 +7,8 @@ const HomePage = function () {
         <div>
             <Menu></Menu>
             <h1>Página inicial</h1>
+            <br/>
+            <RoomList></RoomList>
         </div>
     )
 }

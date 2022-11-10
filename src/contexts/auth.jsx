@@ -3,7 +3,7 @@ import React, { useState, useEffect, createContext } from "react";
 import { useNavigate } from "react-router-dom"
 import { toast } from 'react-toastify';
 
-import { api, auth } from "../services/api"
+import { api, auth, create } from "../services/api"
 
 export const AuthContext = createContext();
 
@@ -24,9 +24,7 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const login = async (email, password) => {
-
         const response = await auth(email, password);
-
         if (response.status == 200) {
             const loggedUser = response.data;
             localStorage.setItem("userSession", JSON.stringify(loggedUser));
@@ -40,6 +38,17 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const register = async (user) => {
+        const response = await create(user);
+        if (response.status == 200 || response.status == 201) {
+            navigate("/login");
+        } else {
+            toast.error("Erro ao criar conta, tente novamente.", {
+                position: toast.POSITION.TOP_CENTER
+            });
+        }
+    };
+
     const logout = () => {
         localStorage.removeItem("userSession");
         setUser(null);
@@ -48,8 +57,14 @@ export const AuthProvider = ({ children }) => {
 
     return (
         <AuthContext.Provider
-            //!! = Cast to boolean
-            value={{ authenticated: !!user, loading, user, login, logout }}>
+            value={{
+                authenticated: user,
+                loading,
+                user,
+                login,
+                logout,
+                register
+            }}>
             {children}
         </AuthContext.Provider>
     );
