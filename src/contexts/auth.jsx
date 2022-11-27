@@ -3,7 +3,7 @@ import React, { useState, useEffect, createContext } from "react";
 import { useNavigate } from "react-router-dom"
 import { toast } from 'react-toastify';
 
-import { api, auth, create } from "../services/api"
+import { URL_API, api, auth, create, createRoom, URL_WS } from "../services/api"
 
 export const AuthContext = createContext();
 
@@ -12,6 +12,7 @@ export const AuthProvider = ({ children }) => {
     const navigate = useNavigate();
 
     const [user, setUser] = useState(null);
+    const [room, setRoom] = useState(null);
     const [loading, setLoading] = useState(true);
 
     //On start/render view
@@ -20,8 +21,21 @@ export const AuthProvider = ({ children }) => {
         if (userSession) {
             setUser(JSON.parse(userSession));
         }
+        const roomSession = localStorage.getItem("roomSession");
+        if (roomSession) {
+            setRoom(JSON.parse(roomSession));
+        }
         setLoading(false);
     }, []);
+
+
+    const serverUrl = () => {
+        return URL_API;
+    }
+
+    const socketUrl = () => {
+        return URL_WS;
+    }
 
     const login = async (email, password) => {
         const response = await auth(email, password);
@@ -55,15 +69,33 @@ export const AuthProvider = ({ children }) => {
         navigate("/login");
     };
 
+    const registerRoom = async (room) => {
+        const response = await createRoom(room);
+        if (response.status == 200 || response.status == 201) {
+            const roomUser = response.data;
+            localStorage.setItem("roomSession", JSON.stringify(roomUser));
+            setRoom(roomUser);
+            navigate("/room-wait");
+        } else {
+            toast.error("Erro ao criar sala, tente novamente.", {
+                position: toast.POSITION.TOP_CENTER
+            });
+        }
+    };
+
     return (
         <AuthContext.Provider
             value={{
                 authenticated: user,
                 loading,
+                serverUrl,
+                socketUrl,
                 user,
                 login,
                 logout,
-                register
+                register,
+                registerRoom,
+                room,
             }}>
             {children}
         </AuthContext.Provider>

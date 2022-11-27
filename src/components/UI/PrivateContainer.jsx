@@ -8,7 +8,7 @@ import { useContext } from "react";
 
 const PrivateContainer = ({ children }) => {
 
-    const { authenticated, loading } = useContext(AuthContext);
+    const { authenticated, loading, room } = useContext(AuthContext);
 
     if (loading) {
         return <div className="loading">Carregando...</div>
@@ -16,6 +16,13 @@ const PrivateContainer = ({ children }) => {
     if (!authenticated) {
         return (<Navigate to="/login" />);
     }
+
+    console.log(Navigate);
+
+    if (room) {
+        //return (<Navigate to="/room-wait" />);
+    }
+
     return children;
 }
 

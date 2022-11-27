@@ -1,7 +1,10 @@
 import axios from "axios";
 
+export const URL_API = "http://129.148.45.90";
+export const URL_WS = "ws://129.148.45.90";
+
 export const api = axios.create({
-    baseURL: "http://129.148.45.90",
+    baseURL: URL_API,
 });
 
 export const auth = async (email, password) => {
@@ -20,6 +23,18 @@ export const create = async (user) => {
             return result;
         })
         .catch((error) => {
+            return error.response;
+        });
+}
+
+export const createRoom = async (room) => {
+    return api.post('/api/v1/room/', room)
+        .then((result) => {
+            console.log(result);
+            return result;
+        })
+        .catch((error) => {
+            console.log(error);
             return error.response;
         });
 }
