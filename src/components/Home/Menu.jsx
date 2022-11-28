@@ -13,7 +13,7 @@ const Menu = (props) => {
 
     return (
         <NavBar title="Bem-Vindo" id="menu">
-            <NavItem title="Salas" route="/"></NavItem>
+            <NavItem title="Salas Disponíveis" route="/"></NavItem>
             <NavItem title="Minha Conta" route="/profile"></NavItem>
             <button type="button" onClick={onClickLogout} className="btn btn-sm btn-outline-danger">Sair</button>
         </NavBar>
