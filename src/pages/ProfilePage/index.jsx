@@ -11,17 +11,26 @@ const ProfilePage = function () {
         <div>
             <Menu></Menu>
             <h1>Minha Conta</h1>
+            <br/>
             <div className="form-horizontal">
-                <div className="form-group">
-                    <label className="col-sm-12 fw-bold">Identificador</label>
-                    <label className="col-sm-12">{user.id}</label>
-                    <label className="col-sm-12 fw-bold">Nome</label>
-                    <label className="col-sm-12">{user.first_name} {user.last_name}</label>
-                    <label className="col-sm-12 fw-bold">E-mail</label>
-                    <label className="col-sm-12">{user.email}</label>
-                    <label className="col-sm-12 fw-bold">Usuário</label>
-                    <label className="col-sm-12">{user.username}</label>
-                </div>
+                <label className="col-sm-12 fw-bold">Identificador:</label>
+                <br/>
+                <label className="col-sm-12">{user.id}</label>
+                <br/>
+                <br/>
+                <label className="col-sm-12 fw-bold">Nome:</label>
+                <br/>
+                <label className="col-sm-12">{user.first_name} {user.last_name}</label>
+                <br/>
+                <br/>
+                <label className="col-sm-12 fw-bold">E-mail:</label>
+                <br/>
+                <label className="col-sm-12">{user.email}</label>
+                <br/>
+                <br/>
+                <label className="col-sm-12 fw-bold">Usuário:</label>
+                <br/>
+                <label className="col-sm-12">{user.username}</label>
             </div>
         </div>
     )
