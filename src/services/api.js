@@ -27,14 +27,42 @@ export const create = async (user) => {
         });
 }
 
-export const createRoom = async (room) => {
-    return api.post('/api/v1/room/', room)
+export const listRoom = async () => {
+    return api.get('/api/v1/room/')
         .then((result) => {
-            console.log(result);
             return result;
         })
         .catch((error) => {
-            console.log(error);
+            return error.response;
+        });
+}
+
+export const findRoom = async (id) => {
+    return api.get('/api/v1/room/' + id + "/")
+        .then((result) => {
+            return result;
+        })
+        .catch((error) => {
+            return error.response;
+        });
+}
+
+export const createRoom = async (room) => {
+    return api.post('/api/v1/room/', room)
+        .then((result) => {
+            return result;
+        })
+        .catch((error) => {
+            return error.response;
+        });
+}
+
+export const editRoom = async (room) => {
+    return api.put('/api/v1/room/' + room.id + '/', room)
+        .then((result) => {
+            return result;
+        })
+        .catch((error) => {
             return error.response;
         });
 }

@@ -3,7 +3,7 @@ import React, { useState, useEffect, createContext } from "react";
 import { useNavigate } from "react-router-dom"
 import { toast } from 'react-toastify';
 
-import { URL_API, api, auth, create, createRoom, URL_WS } from "../services/api"
+import { URL_API, URL_WS, api, auth, create, listRoom, findRoom, createRoom, editRoom } from "../services/api"
 
 export const AuthContext = createContext();
 
@@ -69,6 +69,30 @@ export const AuthProvider = ({ children }) => {
         navigate("/login");
     };
 
+    const roomList = async () => {
+        const response = await listRoom();
+        if (response.status == 200 || response.status == 201) {
+            return response.data;
+        } else {
+            toast.error("Erro ao buscar salas, tente novamente.", {
+                position: toast.POSITION.TOP_CENTER
+            });
+        }
+    }
+
+
+
+    const getRoom = async (id) => {
+        const response = await findRoom(id);
+        if (response.status == 200 || response.status == 201) {
+            return response.data;
+        } else {
+            toast.error("Erro ao buscar salas, tente novamente.", {
+                position: toast.POSITION.TOP_CENTER
+            });
+        }
+    }
+
     const registerRoom = async (room) => {
         const response = await createRoom(room);
         if (response.status == 200 || response.status == 201) {
@@ -83,19 +107,43 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const updateRoom = async (room, setRoomSession) => {
+        const response = await editRoom(room);
+        if (response.status == 200 || response.status == 201) {
+            const roomUser = response.data;
+            if (setRoomSession) {
+                localStorage.setItem("roomSession", JSON.stringify(roomUser));
+                setRoom(roomUser);
+                navigate("/room-wait");
+            } else {
+                return roomUser;
+            }
+        } else {
+            toast.error("Erro ao criar sala, tente novamente.", {
+                position: toast.POSITION.TOP_CENTER
+            });
+        }
+    };
+
     return (
         <AuthContext.Provider
             value={{
-                authenticated: user,
-                loading,
+                //Defines
                 serverUrl,
                 socketUrl,
+                loading,
+                //User
+                authenticated: user,
                 user,
                 login,
                 logout,
                 register,
-                registerRoom,
+                //Room
                 room,
+                getRoom,
+                roomList,
+                registerRoom,
+                updateRoom
             }}>
             {children}
         </AuthContext.Provider>

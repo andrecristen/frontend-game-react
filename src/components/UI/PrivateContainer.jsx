@@ -17,8 +17,6 @@ const PrivateContainer = ({ children }) => {
         return (<Navigate to="/login" />);
     }
 
-    console.log(Navigate);
-
     if (room) {
         //return (<Navigate to="/room-wait" />);
     }

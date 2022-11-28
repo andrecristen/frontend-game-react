@@ -4,7 +4,7 @@ import "./styles.css"
 import { ToastContainer } from 'react-toastify';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowCircleLeft, faSpinner } from '@fortawesome/free-solid-svg-icons'
+import { faArrowCircleLeft } from '@fortawesome/free-solid-svg-icons'
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../contexts/auth";
 import { toast } from 'react-toastify';
@@ -16,13 +16,24 @@ import useWebSocket from 'react-use-websocket';
 
 const RoomWaitPage = function () {
 
+    let navigate = useNavigate();
+
+    const [validatingRegister, setValidatingRegister] = useState(false);
     const { user, room, socketUrl } = useContext(AuthContext);
 
-    var wsUrl = socketUrl() + "/ws/room/" + room.id + "/";
 
-    console.log(wsUrl);
+    const roomId = room && room.id ? room.id : null;
 
-    const { lastJsonMessage, sendMessage } = useWebSocket(wsUrl, {
+    var wsUrl = socketUrl() + "/ws/room/" + roomId + "/";
+
+    const {
+        sendMessage,
+        sendJsonMessage,
+        lastMessage,
+        lastJsonMessage,
+        readyState,
+        getWebSocket,
+    } = useWebSocket(wsUrl, {
         onOpen: () => {
             console.log("WebSocket conectado.");
         },
@@ -32,22 +43,23 @@ const RoomWaitPage = function () {
             }
         },
         queryParams: { 'user': user.id },
-        onError: (event) => { 
-            console.error(event); 
+        onError: (event) => {
+            console.error(event);
+            toast.error('Não foi possível realizar o login com as credenciais informadas.', {
+                position: toast.POSITION.TOP_CENTER
+            });
+            navigate("/");
         },
         shouldReconnect: (closeEvent) => true,
-        reconnectInterval: 3000
+        reconnectInterval: 300
     });
-
-    let navigate = useNavigate();
-
-    const [validatingRegister, setValidatingRegister] = useState(false);
 
     const submit = async (e) => {
 
     }
 
     const onClickExit = () => {
+        getWebSocket().close();
         navigate("/");
     }
 
