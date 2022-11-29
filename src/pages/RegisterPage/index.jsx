@@ -34,7 +34,7 @@ const RegisterPage = function () {
             user.email = email;
             user.password = password;
             user.birth_date = "2000-09-03";
-            user.date_joined = "";
+            //user.date_joined = "";
             setValidatingRegister(true);
             await register(user);
             setValidatingRegister(false);
