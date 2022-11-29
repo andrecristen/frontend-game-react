@@ -20,10 +20,10 @@ const RoomWaitPage = function () {
     const [loadingUsers, setLoadingUsers] = useState(true);
     const [connecting, setConnecting] = useState(true);
     const [userList, setUserList] = useState([]);
-    const { user, room, socketUrl, getUsersRoom, enterRoom } = useContext(AuthContext);
+    const { user, room, socketUrl, getUsersRoom, enterRoom, exitRoom} = useContext(AuthContext);
 
     const roomId = room && room.id ? room.id : null;
-    const isOwner = (room.owner == user.id);
+    const isOwner = (room && room.owner == user.id);
 
     var wsUrl = socketUrl() + "/ws/room/" + roomId + "/" + user.id + "/";
 
@@ -79,8 +79,20 @@ const RoomWaitPage = function () {
     }
 
     const onClickExit = () => {
-        getWebSocket().close();
-        navigate("/");
+        exitRoom().then((success) => {
+            if (success) {
+                getWebSocket().close();
+                navigate("/");
+            } else {
+                toast.error("Erro ao sair da sala, tente novamente.", {
+                    position: toast.POSITION.TOP_CENTER
+                });
+            }
+        }).catch((exc) => {
+            toast.error("Erro ao sair da sala, tente novamente.", {
+                position: toast.POSITION.TOP_CENTER
+            });
+        })
     }
 
     const onClickRemovePlayer = () => {

@@ -130,7 +130,7 @@ export const AuthProvider = ({ children }) => {
             }
             return true;
         } else {
-            toast.error("Erro ao criar sala, tente novamente.", {
+            toast.error("Erro ao atualizar sala, tente novamente.", {
                 position: toast.POSITION.TOP_CENTER
             });
             return false;
@@ -146,6 +146,33 @@ export const AuthProvider = ({ children }) => {
                     dataRoom.owner = user.id;
                 }
                 return await updateRoom(dataRoom, true)
+            }
+            return false;
+        } catch (exc) {
+            return false;
+        }
+    }
+
+    const exitRoom = async () => {
+        return await removeUserRoom(room, user);
+    }
+
+    const removeUserRoom = async (room, user) => {
+        try {
+            const dataRoom = await getRoom(room.id);
+            if (dataRoom) {
+                dataRoom.users = dataRoom.users.filter((userId) => userId != user.id);
+                if (dataRoom.owner == user.id) {
+                    dataRoom.owner = dataRoom.users[0] ?? null;
+                }
+                if (!dataRoom.users.length) {
+                    dataRoom.active = false;
+                }
+                const success = await updateRoom(dataRoom, false);
+                if (success) {
+                    setRoomUserSession(null);
+                }
+                return success;
             }
             return false;
         } catch (exc) {
@@ -175,6 +202,7 @@ export const AuthProvider = ({ children }) => {
                 registerRoom,
                 updateRoom,
                 enterRoom,
+                exitRoom,
             }}>
             {children}
         </AuthContext.Provider>
