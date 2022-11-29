@@ -25,10 +25,12 @@ const RoomWaitPage = function () {
     const roomId = room && room.id ? room.id : null;
     const isOwner = (room && room.owner == user.id);
     
+    const ws;
+    
     useEffect(() => {
         var wsUrl = socketUrl() + "/ws/room/" + roomId + "/" + user.id + "/";
 
-        const ws = new WebSocket(wsUrl);
+        ws = new WebSocket(wsUrl);
         ws.onopen = (event) => {
             console.log(event, "Conexão Aberta");
             enterRoom(room).then((success) => {
