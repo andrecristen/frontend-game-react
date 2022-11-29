@@ -7,7 +7,7 @@ const RoomItem = (props) => {
 
     let navigate = useNavigate();
 
-    const { getRoom, updateRoom, user } = useContext(AuthContext);
+    const { setRoomUserSession } = useContext(AuthContext);
 
     var room = new Room();
 
@@ -20,15 +20,8 @@ const RoomItem = (props) => {
     var isOpen = (players < maxPlayers && status == room.STATUS_WAITING_FOR_PLAYERS);
 
     const onClickEnter = () => {
-        getRoom(id).then((data) => {
-            data.users.push(user.id);
-            if (!data.owner) {
-                data.owner = user.id;
-            }
-            updateRoom(data, true);
-        }).catch((exc) => {
-            console.log(exc);
-        });
+        setRoomUserSession(props.data);
+        navigate("/room-wait");
     }
 
     return (

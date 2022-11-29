@@ -1,7 +1,6 @@
 import React, { useState, useContext, useEffect } from "react";
 
 import { AuthContext } from "../../contexts/auth";
-import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -33,7 +32,6 @@ const LoginPage = function () {
 
     return (
         <div className="vh-100">
-            <ToastContainer></ToastContainer>
             <div className="container-fluid h-custom">
                 <div className="row d-flex justify-content-center align-items-center h-100">
                     <div className="col-md-9 col-lg-6 col-xl-5">

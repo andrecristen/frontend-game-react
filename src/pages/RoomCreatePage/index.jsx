@@ -1,8 +1,6 @@
 import { useState, useContext } from "react";
 import "./styles.css"
 
-import { ToastContainer } from 'react-toastify';
-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowCircleLeft, faSpinner } from '@fortawesome/free-solid-svg-icons'
 import { useNavigate } from "react-router-dom";
@@ -49,7 +47,6 @@ const RoomCreatePage = function () {
                 <button onClick={onClickBack} className="btn btn-lg btn-danger">Voltar  <FontAwesomeIcon icon={faArrowCircleLeft} /></button>
             </div>
             <section className="vh-100">
-                <ToastContainer></ToastContainer>
                 <div className="container">
                     <div className="row d-flex justify-content-center align-items-center h-100">
                         <div className="col-lg-12 col-xl-11">

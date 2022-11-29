@@ -3,7 +3,7 @@ import React, { useState, useEffect, createContext } from "react";
 import { useNavigate } from "react-router-dom"
 import { toast } from 'react-toastify';
 
-import { URL_API, URL_WS, api, auth, create, listRoom, findRoom, createRoom, editRoom } from "../services/api"
+import { URL_API, URL_WS, api, auth, create, listRoom, findRoom, usersRoom, createRoom, editRoom } from "../services/api"
 
 export const AuthContext = createContext();
 
@@ -80,14 +80,23 @@ export const AuthProvider = ({ children }) => {
         }
     }
 
-
-
     const getRoom = async (id) => {
         const response = await findRoom(id);
         if (response.status == 200 || response.status == 201) {
             return response.data;
         } else {
             toast.error("Erro ao buscar salas, tente novamente.", {
+                position: toast.POSITION.TOP_CENTER
+            });
+        }
+    }
+
+    const getUsersRoom = async (room) => {
+        const response = await usersRoom(room);
+        if (response.status == 200 || response.status == 201) {
+            return response.data;
+        } else {
+            toast.error("Erro ao buscar usuários na sala, tente novamente.", {
                 position: toast.POSITION.TOP_CENTER
             });
         }
@@ -107,23 +116,42 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const setRoomUserSession = (room) => {
+        localStorage.setItem("roomSession", JSON.stringify(room));
+        setRoom(room);
+    }
+
     const updateRoom = async (room, setRoomSession) => {
         const response = await editRoom(room);
         if (response.status == 200 || response.status == 201) {
             const roomUser = response.data;
             if (setRoomSession) {
-                localStorage.setItem("roomSession", JSON.stringify(roomUser));
-                setRoom(roomUser);
-                navigate("/room-wait");
-            } else {
-                return roomUser;
+                setRoomUserSession(roomUser);
             }
+            return true;
         } else {
             toast.error("Erro ao criar sala, tente novamente.", {
                 position: toast.POSITION.TOP_CENTER
             });
+            return false;
         }
     };
+
+    const enterRoom = async (room) => {
+        try {
+            const dataRoom = await getRoom(room.id);
+            if (dataRoom) {
+                dataRoom.users.push(user.id);
+                if (!dataRoom.owner) {
+                    dataRoom.owner = user.id;
+                }
+                return await updateRoom(dataRoom, true)
+            }
+            return false;
+        } catch (exc) {
+            return false;
+        }
+    }
 
     return (
         <AuthContext.Provider
@@ -139,11 +167,14 @@ export const AuthProvider = ({ children }) => {
                 logout,
                 register,
                 //Room
+                setRoomUserSession,
                 room,
                 getRoom,
+                getUsersRoom,
                 roomList,
                 registerRoom,
-                updateRoom
+                updateRoom,
+                enterRoom,
             }}>
             {children}
         </AuthContext.Provider>

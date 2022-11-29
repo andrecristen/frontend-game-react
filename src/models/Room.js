@@ -24,6 +24,7 @@ export default class Room {
     password;
     status;
     max_players;
+    active;
     board;
     owner;
     users;

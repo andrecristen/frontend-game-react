@@ -66,3 +66,13 @@ export const editRoom = async (room) => {
             return error.response;
         });
 }
+
+export const usersRoom = async (room) => {
+    return api.get('/api/v1/room/' + room.id + '/users/')
+        .then((result) => {
+            return result;
+        })
+        .catch((error) => {
+            return error.response;
+        });
+}
