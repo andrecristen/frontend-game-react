@@ -24,32 +24,34 @@ const RoomWaitPage = function () {
 
     const roomId = room && room.id ? room.id : null;
     const isOwner = (room && room.owner == user.id);
+    
+    useEffect(() => {
+        var wsUrl = socketUrl() + "/ws/room/" + roomId + "/" + user.id + "/";
 
-    var wsUrl = socketUrl() + "/ws/room/" + roomId + "/" + user.id + "/";
-
-    const ws = new WebSocket(wsUrl);
-    ws.onopen = (event) => {
-        console.log(event, "Conexão Aberta");
-        enterRoom(room).then((success) => {
-            if (!success) {
+        const ws = new WebSocket(wsUrl);
+        ws.onopen = (event) => {
+            console.log(event, "Conexão Aberta");
+            enterRoom(room).then((success) => {
+                if (!success) {
+                    onClickExit();
+                } else {
+                    setConnecting(false);
+                    loadUsers();
+                }
+            }).catch(() => {
                 onClickExit();
-            } else {
-                setConnecting(false);
-                loadUsers();
-            }
-        }).catch(() => {
-            onClickExit();
-        });
-    };
-    ws.onerror = function (event) {
-        toast.error('Não foi possível se conectar a sala escolhida.', {
-            position: toast.POSITION.TOP_CENTER
-        });
-        navigate("/");
-    };    
-    ws.onmessage = function (event) {
-        console.log(event, "Mensagem Recebida");
-    };
+            });
+        };
+        ws.onerror = function (event) {
+            toast.error('Não foi possível se conectar a sala escolhida.', {
+                position: toast.POSITION.TOP_CENTER
+            });
+            navigate("/");
+        };    
+        ws.onmessage = function (event) {
+            console.log(event, "Mensagem Recebida");
+        };
+    }, []);
 
     const loadUsers = async (e) => {
         setLoadingUsers(true);
