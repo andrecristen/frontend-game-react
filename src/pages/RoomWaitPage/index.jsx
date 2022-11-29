@@ -27,10 +27,6 @@ const RoomWaitPage = function () {
 
     var wsUrl = socketUrl() + "/ws/room/" + roomId + "/" + user.id + "/";
 
-    useEffect(() => {
-        loadUsers();
-    }, [])
-
     const {
         sendMessage,
         sendJsonMessage,
@@ -45,6 +41,7 @@ const RoomWaitPage = function () {
                     onClickExit();
                 } else {
                     setConnecting(false);
+                    loadUsers();
                 }
             }).catch(() => {
                 onClickExit();
