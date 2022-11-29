@@ -48,9 +48,8 @@ const RoomWaitPage = function () {
             });
         },
         onMessage: () => {
-            if (lastJsonMessage) {
-                console.log(lastJsonMessage);
-            }
+            console.log("Mensagem Recebida");
+            console.log(sendMessage, sendJsonMessage, lastMessage, lastJsonMessage, readyState, getWebSocket);
         },
         onError: (event) => {
             toast.error('Não foi possível se conectar a sala escolhida.', {
