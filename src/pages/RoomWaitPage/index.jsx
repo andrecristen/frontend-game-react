@@ -67,7 +67,7 @@ const RoomWaitPage = function () {
     const onClickExit = () => {
         exitRoom().then((success) => {
             if (success) {
-                getWebSocket().close();
+                ws.close();
                 navigate("/");
             } else {
                 toast.error("Erro ao sair da sala, tente novamente.", {
