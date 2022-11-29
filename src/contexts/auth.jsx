@@ -162,8 +162,8 @@ export const AuthProvider = ({ children }) => {
             const dataRoom = await getRoom(room.id);
             if (dataRoom) {
                 dataRoom.users = dataRoom.users.filter((userId) => userId != user.id);
-                if (dataRoom.owner == user.id) {
-                    dataRoom.owner = dataRoom.users[0] ?? null;
+                if (dataRoom.owner == user.id && dataRoom.users[0]) {
+                    dataRoom.owner = dataRoom.users[0];
                 }
                 if (!dataRoom.users.length) {
                     dataRoom.active = false;

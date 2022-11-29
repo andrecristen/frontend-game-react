@@ -44,6 +44,7 @@ const RoomList = (props) => {
                     );
                 })}
             </ol>
+            {foundRooms.length == 0 ? <strong>Nenhuma sala</strong> : ''}
         </div>
     );
 }
