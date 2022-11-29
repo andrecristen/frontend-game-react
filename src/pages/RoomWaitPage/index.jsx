@@ -27,6 +27,14 @@ const RoomWaitPage = function () {
 
     var wsUrl = socketUrl() + "/ws/room/" + roomId + "/" + user.id + "/";
 
+    const ws = new WebSocket(wsUrl);
+    ws.onopen = (event) => {
+        console.log(event, "Conexão Aberta");
+    };
+    ws.onmessage = function (event) {
+        console.log(event, "Mensagem Recebida");
+    };
+    
     const {
         sendMessage,
         sendJsonMessage,
