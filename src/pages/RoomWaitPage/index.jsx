@@ -30,44 +30,26 @@ const RoomWaitPage = function () {
     const ws = new WebSocket(wsUrl);
     ws.onopen = (event) => {
         console.log(event, "Conexão Aberta");
+        enterRoom(room).then((success) => {
+            if (!success) {
+                onClickExit();
+            } else {
+                setConnecting(false);
+                loadUsers();
+            }
+        }).catch(() => {
+            onClickExit();
+        });
     };
+    ws.onerror = function (event) {
+        toast.error('Não foi possível se conectar a sala escolhida.', {
+            position: toast.POSITION.TOP_CENTER
+        });
+        navigate("/");
+    };    
     ws.onmessage = function (event) {
         console.log(event, "Mensagem Recebida");
     };
-    
-    const {
-        sendMessage,
-        sendJsonMessage,
-        lastMessage,
-        lastJsonMessage,
-        readyState,
-        getWebSocket,
-    } = useWebSocket(wsUrl, {
-        onOpen: () => {
-            enterRoom(room).then((success) => {
-                if (!success) {
-                    onClickExit();
-                } else {
-                    setConnecting(false);
-                    loadUsers();
-                }
-            }).catch(() => {
-                onClickExit();
-            });
-        },
-        onMessage: () => {
-            console.log("Mensagem Recebida");
-            console.log(sendMessage, sendJsonMessage, lastMessage, lastJsonMessage, readyState, getWebSocket);
-        },
-        onError: (event) => {
-            toast.error('Não foi possível se conectar a sala escolhida.', {
-                position: toast.POSITION.TOP_CENTER
-            });
-            navigate("/");
-        },
-        shouldReconnect: (closeEvent) => true,
-        reconnectInterval: 300
-    });
 
     const loadUsers = async (e) => {
         setLoadingUsers(true);
