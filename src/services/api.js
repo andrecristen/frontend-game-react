@@ -67,6 +67,26 @@ export const editRoom = async (room) => {
         });
 }
 
+export const addUserRoom = async (roomId, userId) => {
+    return api.put('/api/v1/room/' + roomId + '/add_user/', {
+        user: userId
+    }).then((result) => {
+        return result;
+    }).catch((error) => {
+        return error.response;
+    });
+}
+
+export const removeUserRoom = async (roomId, userId) => {
+    return api.put('/api/v1/room/' + roomId + '/remove_user/', {
+        user: userId
+    }).then((result) => {
+        return result;
+    }).catch((error) => {
+        return error.response;
+    });
+}
+
 export const usersRoom = async (room) => {
     return api.get('/api/v1/room/' + room.id + '/users/')
         .then((result) => {

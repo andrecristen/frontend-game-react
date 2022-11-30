@@ -3,7 +3,7 @@ import React, { useState, useEffect, createContext } from "react";
 import { useNavigate } from "react-router-dom"
 import { toast } from 'react-toastify';
 
-import { URL_API, URL_WS, api, auth, create, listRoom, findRoom, usersRoom, createRoom, editRoom } from "../services/api"
+import { URL_API, URL_WS, api, auth, create, listRoom, findRoom, usersRoom, createRoom, editRoom, addUserRoom, removeUserRoom } from "../services/api"
 
 export const AuthContext = createContext();
 
@@ -138,44 +138,32 @@ export const AuthProvider = ({ children }) => {
     };
 
     const enterRoom = async (room) => {
-        try {
-            const dataRoom = await getRoom(room.id);
-            if (dataRoom) {
-                dataRoom.users.push(user.id);
-                if (!dataRoom.owner) {
-                    dataRoom.owner = user.id;
-                }
-                return await updateRoom(dataRoom, true)
-            }
-            return false;
-        } catch (exc) {
+        const response = await addUserRoom(room.id, user.id);
+        if (response.status == 200 || response.status == 201) {
+            setRoomUserSession(room);
+            return true
+        } else {
+            toast.error("Erro ao entrar na sala, tente novamente.", {
+                position: toast.POSITION.TOP_CENTER
+            });
             return false;
         }
     }
 
     const exitRoom = async () => {
-        return await removeUserRoom(room, user);
+        return await sendRemoveUserRoom(room, user);
     }
 
-    const removeUserRoom = async (room, user) => {
-        try {
-            const dataRoom = await getRoom(room.id);
-            if (dataRoom) {
-                dataRoom.users = dataRoom.users.filter((userId) => userId != user.id);
-                if (dataRoom.owner == user.id && dataRoom.users[0]) {
-                    dataRoom.owner = dataRoom.users[0];
-                }
-                if (!dataRoom.users.length) {
-                    dataRoom.active = false;
-                }
-                const success = await updateRoom(dataRoom, false);
-                if (success) {
-                    setRoomUserSession(null);
-                }
-                return success;
-            }
-            return false;
-        } catch (exc) {
+    const sendRemoveUserRoom = async (room, user) => {
+        debugger;
+        const response = await removeUserRoom(room.id, user.id);
+        if (response.status == 200 || response.status == 201) {
+            setRoomUserSession(null);
+            return true
+        } else {
+            toast.error("Erro ao sair da sala, tente novamente.", {
+                position: toast.POSITION.TOP_CENTER
+            });
             return false;
         }
     }
@@ -203,6 +191,7 @@ export const AuthProvider = ({ children }) => {
                 updateRoom,
                 enterRoom,
                 exitRoom,
+                sendRemoveUserRoom,
             }}>
             {children}
         </AuthContext.Provider>

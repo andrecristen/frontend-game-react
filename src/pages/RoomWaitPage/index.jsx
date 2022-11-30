@@ -20,42 +20,57 @@ const RoomWaitPage = function () {
     const [loadingUsers, setLoadingUsers] = useState(true);
     const [connecting, setConnecting] = useState(true);
     const [userList, setUserList] = useState([]);
-    const { user, room, socketUrl, getUsersRoom, enterRoom, exitRoom} = useContext(AuthContext);
+    const [webSocket, setWebSocket] = useState(null);
+
+    const { user, room, socketUrl, getUsersRoom, enterRoom, exitRoom } = useContext(AuthContext);
 
     const roomId = room && room.id ? room.id : null;
     const isOwner = (room && room.owner == user.id);
-    
-    let ws;
-    
-    useEffect(() => {
-        var wsUrl = socketUrl() + "/ws/room/" + roomId + "/" + user.id + "/";
 
-        ws = new WebSocket(wsUrl);
-        ws.onopen = (event) => {
-            console.log(event, "Conexão Aberta");
-            enterRoom(room).then((success) => {
-                if (!success) {
+    useEffect(() => {
+        if (!webSocket) {
+            var wsUrl = socketUrl() + "/ws/room/" + roomId + "/" + user.id + "/";
+
+            let ws = new WebSocket(wsUrl);
+            ws.onopen = (event) => {
+                console.log(event, "Conexão Aberta");
+                enterRoom(room).then((success) => {
+                    if (!success) {
+                        onClickExit();
+                    } else {
+                        setConnecting(false);
+                        loadUsers();
+                    }
+                }).catch(() => {
                     onClickExit();
+                });
+            };
+            ws.onerror = function (event) {
+                toast.error('Não foi possível se conectar a sala escolhida.', {
+                    position: toast.POSITION.TOP_CENTER
+                });
+                navigate("/");
+            };
+            ws.onmessage = function (event) {
+                let jsonData = JSON.parse(event.data);
+                if (jsonData.payload && jsonData.payload.event) {
+                    console.log("Mensagem recebida: " + jsonData.payload.event);
+                    switch (jsonData.payload.event) {
+                        case "new_player":
+                        case "disconnect_player":
+                            loadUsers();
+                            break;
+                    }
                 } else {
-                    setConnecting(false);
-                    loadUsers();
+                    console.log("Mensagem Recebida Não Usada...");
+                    console.table(jsonData);
                 }
-            }).catch(() => {
-                onClickExit();
-            });
-        };
-        ws.onerror = function (event) {
-            toast.error('Não foi possível se conectar a sala escolhida.', {
-                position: toast.POSITION.TOP_CENTER
-            });
-            navigate("/");
-        };    
-        ws.onmessage = function (event) {
-            console.log(event, "Mensagem Recebida");
-        };
+            };
+            setWebSocket(ws);
+        }
     }, []);
 
-    const loadUsers = async (e) => {
+    const loadUsers = async () => {
         setLoadingUsers(true);
         getUsersRoom(room).then((data) => {
             setUserList(data.users);
@@ -71,7 +86,7 @@ const RoomWaitPage = function () {
     const onClickExit = () => {
         exitRoom().then((success) => {
             if (success) {
-                ws.close();
+                webSocket.close();
                 navigate("/");
             } else {
                 toast.error("Erro ao sair da sala, tente novamente.", {
@@ -86,7 +101,7 @@ const RoomWaitPage = function () {
     }
 
     const onClickRemovePlayer = () => {
-        
+
     }
 
     const onClickStartMatch = () => {
@@ -99,8 +114,8 @@ const RoomWaitPage = function () {
             {connecting || loadingUsers
                 ?
                 <div className="icon-container text-center vh-100">
-                    <strong>Conectando a sala...</strong>
-                    <br/>
+                    {connecting ? <strong>Conectando a sala...</strong> : <strong>Atualizando a sala...</strong>}
+                    <br />
                     <FontAwesomeIcon icon={faSpinner} spin />
                 </div>
                 :
