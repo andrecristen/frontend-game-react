@@ -57,8 +57,11 @@ const RoomWaitPage = function () {
                     console.log("Mensagem recebida: " + jsonData.payload.event);
                     switch (jsonData.payload.event) {
                         case "new_player":
-                        case "disconnect_player":
+                        case "disconnected_player":
                             loadUsers();
+                            break;
+                        case "remove_player":
+                            validateConnection();
                             break;
                     }
                 } else {
@@ -69,6 +72,18 @@ const RoomWaitPage = function () {
             setWebSocket(ws);
         }
     }, []);
+
+    const validateConnection = async () => {
+        await loadUsers();
+        var stayConnected = userList.some(userComparation => userComparation.id == user.id);
+        if (!stayConnected) {
+            webSocket.close();
+            toast.error("Você foi removido da sala.", {
+                position: toast.POSITION.TOP_CENTER
+            });
+            navigate("/");
+        }
+    }
 
     const loadUsers = async () => {
         setLoadingUsers(true);
