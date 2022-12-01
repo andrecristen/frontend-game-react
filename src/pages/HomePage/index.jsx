@@ -18,7 +18,7 @@ const HomePage = function () {
         <div>
             <Menu/>
             <div className="actions-container">
-                <button onClick={onClickCreateRoom}className="btn btn-lg btn-success">Criar Sala  <FontAwesomeIcon icon={faPlusCircle} /></button>
+                <button onClick={onClickCreateRoom}className="btn btn-lg btn-success"><FontAwesomeIcon icon={faPlusCircle} /> Criar Sala</button>
             </div>
             <h1>Salas Disponíveis</h1>
             <br/>

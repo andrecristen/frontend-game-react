@@ -176,17 +176,22 @@ const RoomWaitPage = function () {
                 :
                 <>
                     <div className="actions-container">
-                        <button onClick={onClickExit} className="btn btn-lg btn-danger">Sair Da Sala  <FontAwesomeIcon icon={faArrowCircleLeft} /></button>
+                        <button onClick={onClickExit} className="btn btn-lg btn-danger"><FontAwesomeIcon icon={faArrowCircleLeft} /> Sair da Sala</button>
                     </div>
                     <section className="vh-100">
+                        <h2>Usuários</h2>
                         <ol className="list-group list-group-numbered list-user">
                             {userList?.map(currentUser => {
                                 return (
                                     <div className="user-item">
-                                        <span className="icon-status">{currentUser.status == "Online" ? <FontAwesomeIcon icon={faCircle} className="online" /> : <FontAwesomeIcon icon={faCircle} className="offline" />}</span>
-                                        <span>{currentUser.name}</span>
-                                        <span className="icon-owner">{room.owner == currentUser.id ? <FontAwesomeIcon icon={faCrown} /> : ""}</span>
-                                        {isOwner && currentUser.id != user.id ? <button onClick={() => { onClickRemovePlayer(currentUser) }} className="btn btn-sm btn-danger icon-remove-user"><FontAwesomeIcon icon={faBan} /> Remover</button> : ""}
+                                        <div className="col-11 user-item-infos">
+                                            <span className="icon-status" title={currentUser.status}>{currentUser.status == "Online" ? <FontAwesomeIcon icon={faCircle} className="online" /> : <FontAwesomeIcon icon={faCircle} className="offline" />}</span>
+                                            <span>{currentUser.name}</span>
+                                            <span className="icon-owner">{room.owner == currentUser.id ? <FontAwesomeIcon title="Dono da sala" icon={faCrown} /> : ""}</span>
+                                        </div>
+                                        <div className="col-1">
+                                            {isOwner && currentUser.id != user.id ? <button title="Remover usuário da sala" onClick={() => { onClickRemovePlayer(currentUser) }} className="btn btn-sm btn-danger"><FontAwesomeIcon icon={faBan} /></button> : ""}
+                                        </div>
                                     </div>
                                 );
                             })}
