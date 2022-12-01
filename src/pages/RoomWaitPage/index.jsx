@@ -116,10 +116,13 @@ const RoomWaitPage = function () {
         }
     }
 
-    const onClickExit = () => {
-        exitRoom().then((success) => {
+    const onClickExit = async () => {
+        try {
+            let success = await exitRoom();
             if (success) {
-                webSocket.close();
+                if (webSocket) {
+                    webSocket.close();
+                }
                 navigate("/");
             } else {
                 console.log(success);
@@ -127,21 +130,27 @@ const RoomWaitPage = function () {
                     position: toast.POSITION.TOP_CENTER
                 });
             }
-        }).catch((exception) => {
+        } catch (exception) {
             console.log(exception);
             toast.error("Erro ao sair da sala, tente novamente.", {
                 position: toast.POSITION.TOP_CENTER
             });
-        })
+        }
     }
 
     const onClickRemovePlayer = async (currentUser) => {
-        let response = await sendRemoveUserRoom(room, currentUser);
-        if (response) {
-            toast.success("Sucesso ao remover usuário.", {
-                position: toast.POSITION.TOP_CENTER
-            });
-        } else {
+        try {
+            let response = await sendRemoveUserRoom(room, currentUser);
+            if (response) {
+                toast.success("Sucesso ao remover usuário.", {
+                    position: toast.POSITION.TOP_CENTER
+                });
+            } else {
+                toast.success("Erro ao remover, tente novamente.", {
+                    position: toast.POSITION.TOP_CENTER
+                });
+            }
+        } catch (exception) {
             toast.success("Erro ao remover, tente novamente.", {
                 position: toast.POSITION.TOP_CENTER
             });

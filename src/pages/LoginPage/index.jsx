@@ -41,7 +41,7 @@ const LoginPage = function () {
                             alt="Imagem de Login" />
                     </div>
                     <div className="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
-                        <h1>Nome do Jogo</h1>
+                        <h1>DSD - Trabalho Final</h1>
                         <form onSubmit={submit}>
 
                             <div className="form-outline mb-4">

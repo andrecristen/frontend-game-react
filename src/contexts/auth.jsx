@@ -158,6 +158,7 @@ export const AuthProvider = ({ children }) => {
         if (success) {
             setRoomUserSession(null);
         }
+        return success;
     }
 
     const sendRemoveUserRoom = async (room, user) => {
