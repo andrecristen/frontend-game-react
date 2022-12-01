@@ -63,7 +63,10 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const logout = () => {
+    const logout = async () => {
+        if (room) {
+            await exitRoom();
+        }
         localStorage.removeItem("userSession");
         setUser(null);
         navigate("/login");

@@ -2,7 +2,7 @@ import { useState, useContext } from "react";
 import "./styles.css"
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowCircleLeft, faSpinner } from '@fortawesome/free-solid-svg-icons'
+import { faArrowCircleLeft, faCircle, faPlugCircleCheck, faPlugCircleExclamation, faSpinner } from '@fortawesome/free-solid-svg-icons'
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../contexts/auth";
 import { toast } from 'react-toastify';
@@ -20,12 +20,13 @@ const RoomWaitPage = function () {
     const [loadingUsers, setLoadingUsers] = useState(true);
     const [connecting, setConnecting] = useState(true);
     const [userList, setUserList] = useState([]);
-    const [webSocket, setWebSocket] = useState(null);
 
     const { user, room, socketUrl, getUsersRoom, enterRoom, exitRoom } = useContext(AuthContext);
 
     const roomId = room && room.id ? room.id : null;
     const isOwner = (room && room.owner == user.id);
+    let lastUserListLoaded = [];
+    let webSocket;
 
     useEffect(() => {
         if (!webSocket) {
@@ -69,33 +70,49 @@ const RoomWaitPage = function () {
                     console.table(jsonData);
                 }
             };
-            setWebSocket(ws);
+            webSocket = ws;
+        } else {
+            console.log("Web Socket já conectado.");
         }
     }, []);
 
     const validateConnection = async () => {
-        await loadUsers();
-        var stayConnected = userList.some(userComparation => userComparation.id == user.id);
-        if (!stayConnected) {
-            webSocket.close();
-            toast.error("Você foi removido da sala.", {
-                position: toast.POSITION.TOP_CENTER
-            });
-            navigate("/");
+        try {
+            let response = await loadUsers();
+            if (response) {
+                var stayConnected = lastUserListLoaded.some(userComparation => userComparation.id == user.id);
+                if (!stayConnected) {
+                    webSocket.close();
+                    if (user) {
+                        toast.error("Você foi removido da sala.", {
+                            position: toast.POSITION.TOP_CENTER
+                        });
+                    }
+                    navigate("/");
+                }
+            }
+        } catch (exception) {
+            console.log(exception);
         }
+
     }
 
     const loadUsers = async () => {
-        setLoadingUsers(true);
-        getUsersRoom(room).then((data) => {
+        try {
+            setLoadingUsers(true);
+            let data = await getUsersRoom(room)
             setUserList(data.users);
+            lastUserListLoaded = data.users;
             setLoadingUsers(false);
-        }).catch((exc) => {
+            return true;
+        } catch (exception) {
+            console.log(exception);
             setLoadingUsers(false);
             toast.error("Erro ao carregar usuários da sala, tente novamente.", {
                 position: toast.POSITION.TOP_CENTER
             });
-        });
+            return false;
+        }
     }
 
     const onClickExit = () => {
@@ -142,7 +159,7 @@ const RoomWaitPage = function () {
                         <ol className="list-group list-group-numbered">
                             {userList?.map(user => {
                                 return (
-                                    <span>{user.name}</span>
+                                    <span>{user.name} {user.status == "Online" ? <FontAwesomeIcon icon={faCircle} className="online" /> : <FontAwesomeIcon icon={faCircle} className="offline"/>}</span>
                                 );
                             })}
                         </ol>

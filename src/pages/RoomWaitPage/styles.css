@@ -1,3 +1,10 @@
 .icon-container {
     font-size: 60px;
 }
+.online {
+    color: green;;
+}
+
+.offline {
+    color: red;
+}
