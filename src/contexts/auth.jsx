@@ -154,16 +154,18 @@ export const AuthProvider = ({ children }) => {
     }
 
     const exitRoom = async () => {
-        return await sendRemoveUserRoom(room, user);
+        let success = await sendRemoveUserRoom(room, user);
+        if (success) {
+            setRoomUserSession(null);
+        }
     }
 
     const sendRemoveUserRoom = async (room, user) => {
-        debugger;
         const response = await removeUserRoom(room.id, user.id);
         if (response.status == 200 || response.status == 201) {
-            setRoomUserSession(null);
             return true
         } else {
+            console.log(response);
             toast.error("Erro ao sair da sala, tente novamente.", {
                 position: toast.POSITION.TOP_CENTER
             });

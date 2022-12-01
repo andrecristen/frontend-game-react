@@ -2,7 +2,7 @@ import { useState, useContext } from "react";
 import "./styles.css"
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowCircleLeft, faCircle, faPlugCircleCheck, faPlugCircleExclamation, faSpinner } from '@fortawesome/free-solid-svg-icons'
+import { faArrowCircleLeft, faBan, faCircle, faCrow, faCrown, faPlugCircleCheck, faPlugCircleExclamation, faSpinner } from '@fortawesome/free-solid-svg-icons'
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../contexts/auth";
 import { toast } from 'react-toastify';
@@ -21,14 +21,15 @@ const RoomWaitPage = function () {
     const [connecting, setConnecting] = useState(true);
     const [userList, setUserList] = useState([]);
 
-    const { user, room, socketUrl, getUsersRoom, enterRoom, exitRoom } = useContext(AuthContext);
+    const { user, room, socketUrl, getUsersRoom, enterRoom, exitRoom, sendRemoveUserRoom } = useContext(AuthContext);
 
     const roomId = room && room.id ? room.id : null;
-    const isOwner = (room && room.owner == user.id);
+    let isOwner = (room && room.owner == user.id);
     let lastUserListLoaded = [];
     let webSocket;
 
     useEffect(() => {
+        isOwner = (room && room.owner == user.id);
         if (!webSocket) {
             var wsUrl = socketUrl() + "/ws/room/" + roomId + "/" + user.id + "/";
 
@@ -84,7 +85,7 @@ const RoomWaitPage = function () {
                 if (!stayConnected) {
                     webSocket.close();
                     if (user) {
-                        toast.error("Você foi removido da sala.", {
+                        toast.info("Você foi removido da sala.", {
                             position: toast.POSITION.TOP_CENTER
                         });
                     }
@@ -121,19 +122,30 @@ const RoomWaitPage = function () {
                 webSocket.close();
                 navigate("/");
             } else {
+                console.log(success);
                 toast.error("Erro ao sair da sala, tente novamente.", {
                     position: toast.POSITION.TOP_CENTER
                 });
             }
-        }).catch((exc) => {
+        }).catch((exception) => {
+            console.log(exception);
             toast.error("Erro ao sair da sala, tente novamente.", {
                 position: toast.POSITION.TOP_CENTER
             });
         })
     }
 
-    const onClickRemovePlayer = () => {
-
+    const onClickRemovePlayer = async (currentUser) => {
+        let response = await sendRemoveUserRoom(room, currentUser);
+        if (response) {
+            toast.success("Sucesso ao remover usuário.", {
+                position: toast.POSITION.TOP_CENTER
+            });
+        } else {
+            toast.success("Erro ao remover, tente novamente.", {
+                position: toast.POSITION.TOP_CENTER
+            });
+        }
     }
 
     const onClickStartMatch = () => {
@@ -156,10 +168,15 @@ const RoomWaitPage = function () {
                         <button onClick={onClickExit} className="btn btn-lg btn-danger">Sair Da Sala  <FontAwesomeIcon icon={faArrowCircleLeft} /></button>
                     </div>
                     <section className="vh-100">
-                        <ol className="list-group list-group-numbered">
-                            {userList?.map(user => {
+                        <ol className="list-group list-group-numbered list-user">
+                            {userList?.map(currentUser => {
                                 return (
-                                    <span>{user.name} {user.status == "Online" ? <FontAwesomeIcon icon={faCircle} className="online" /> : <FontAwesomeIcon icon={faCircle} className="offline"/>}</span>
+                                    <div className="user-item">
+                                        <span className="icon-status">{currentUser.status == "Online" ? <FontAwesomeIcon icon={faCircle} className="online" /> : <FontAwesomeIcon icon={faCircle} className="offline" />}</span>
+                                        <span>{currentUser.name}</span>
+                                        <span className="icon-owner">{room.owner == currentUser.id ? <FontAwesomeIcon icon={faCrown} /> : ""}</span>
+                                        {isOwner && currentUser.id != user.id ? <button onClick={() => { onClickRemovePlayer(currentUser) }} className="btn btn-sm btn-danger icon-remove-user"><FontAwesomeIcon icon={faBan} /> Remover</button> : ""}
+                                    </div>
                                 );
                             })}
                         </ol>
