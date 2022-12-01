@@ -60,7 +60,9 @@ const RoomWaitPage = function () {
                     switch (jsonData.payload.event) {
                         case "new_player":
                         case "disconnected_player":
-                            loadUsers();
+                            setTimeout(() => {
+                                loadUsers();
+                            }, 1000);
                             break;
                         case "remove_player":
                             validateConnection();
