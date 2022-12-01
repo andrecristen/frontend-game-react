@@ -29,6 +29,7 @@
 
 .user-item-infos {
     display: flex;
+    align-items: center;
 }
 
 .icon-status {
