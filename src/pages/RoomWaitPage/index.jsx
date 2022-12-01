@@ -7,8 +7,6 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../contexts/auth";
 import { toast } from 'react-toastify';
 import Menu from "../../components/Home/Menu";
-import Room from "../../models/Room";
-import useWebSocket from 'react-use-websocket';
 import { useEffect } from "react";
 
 
@@ -165,7 +163,6 @@ const RoomWaitPage = function () {
 
     return (
         <div>
-            <Menu />
             {connecting || loadingUsers
                 ?
                 <div className="icon-container text-center vh-100">
