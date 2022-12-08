@@ -65,7 +65,9 @@ const RoomWaitPage = function () {
                             }, 1000);
                             break;
                         case "remove_player":
-                            validateConnection();
+                            setTimeout(() => {
+                                validateConnection();
+                            }, 1000);
                             break;
                         case "start_match":
                             executeStartMatch();
