@@ -2,7 +2,7 @@ import { useState, useContext } from "react";
 import "./styles.css"
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowCircleLeft, faBan, faCircle, faCrow, faCrown, faPlugCircleCheck, faPlugCircleExclamation, faSpinner } from '@fortawesome/free-solid-svg-icons'
+import { faArrowCircleLeft, faBan, faCircle, faCrown, faPaperPlane, faPlay, faSpinner, faUser } from '@fortawesome/free-solid-svg-icons'
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../contexts/auth";
 import { toast } from 'react-toastify';
@@ -18,13 +18,15 @@ const RoomWaitPage = function () {
     const [loadingUsers, setLoadingUsers] = useState(true);
     const [connecting, setConnecting] = useState(true);
     const [userList, setUserList] = useState([]);
+    const [webSocket, setWebSocket] = useState(null);
+    const [messages, setMessages] = useState([]);
+    const [sendMessage, setSendMessage] = useState(null);
 
     const { user, room, socketUrl, getUsersRoom, enterRoom, exitRoom, sendRemoveUserRoom } = useContext(AuthContext);
 
     const roomId = room && room.id ? room.id : null;
     let isOwner = (room && room.owner == user.id);
     let lastUserListLoaded = [];
-    let webSocket;
 
     useEffect(() => {
         isOwner = (room && room.owner == user.id);
@@ -65,17 +67,47 @@ const RoomWaitPage = function () {
                         case "remove_player":
                             validateConnection();
                             break;
+                        case "start_match":
+                            executeStartMatch();
+                            break;
+                        case "message":
+                            addMessage(jsonData.payload);
+                            break;
                     }
                 } else {
-                    console.log("Mensagem Recebida Não Usada...");
+                    console.log("Mensagem Recebida não está no formato correto...");
                     console.table(jsonData);
                 }
             };
-            webSocket = ws;
+            setWebSocket(ws);
         } else {
             console.log("Web Socket já conectado.");
         }
     }, []);
+
+    const executeStartMatch = () => {
+        if (webSocket) {
+            webSocket.close();
+        }
+        navigate("/match");
+    }
+
+    const addMessage = (message) => {
+        message.senderName = findUserName(message.sender);
+        messages.push(message);
+        let newMessages = messages.filter((value, index, self) =>
+            index === self.findIndex((t) => (
+                t.message === value.message && t.sender === value.sender
+            ))
+        );
+        setSendMessage(null);
+        setMessages(newMessages);
+    }
+
+    const findUserName = (id) => {
+        let users = lastUserListLoaded.filter((value) => value.id == id);
+        return users && users[0] && users[0].name ? users[0].name : "Usuário";
+    }
 
     const validateConnection = async () => {
         try {
@@ -146,19 +178,47 @@ const RoomWaitPage = function () {
                     position: toast.POSITION.TOP_CENTER
                 });
             } else {
-                toast.success("Erro ao remover, tente novamente.", {
+                toast.error("Erro ao remover, tente novamente.", {
                     position: toast.POSITION.TOP_CENTER
                 });
             }
         } catch (exception) {
-            toast.success("Erro ao remover, tente novamente.", {
+            toast.error("Erro ao remover, tente novamente.", {
                 position: toast.POSITION.TOP_CENTER
             });
         }
     }
 
     const onClickStartMatch = () => {
+        if (webSocket) {
+            webSocket.send(JSON.stringify({
+                event: "start_match"
+            }));
+        } else {
+            toast.error("Erro, tente novamente.", {
+                position: toast.POSITION.TOP_CENTER
+            });
+        }
+    }
 
+    const onClickSendMessage = () => {
+        if (webSocket) {
+            if (sendMessage) {
+                webSocket.send(JSON.stringify({
+                    event: "message",
+                    message: sendMessage
+                }));
+                setSendMessage("");
+            } else {
+                toast.info("Digite a mensagem para enviar.", {
+                    position: toast.POSITION.TOP_CENTER
+                });
+            }
+        } else {
+            toast.error("Erro, tente novamente.", {
+                position: toast.POSITION.TOP_CENTER
+            });
+        }
     }
 
     return (
@@ -193,6 +253,51 @@ const RoomWaitPage = function () {
                                 );
                             })}
                         </ol>
+                        <div className="container">
+                            <div className="row clearfix">
+                                <div className="col-lg-12">
+                                    <div className="card chat-app">
+                                        <div className="chat">
+                                            <div className="chat-header clearfix">
+                                                <div className="row">
+                                                    <strong>Conversa</strong>
+                                                </div>
+                                            </div>
+                                            <div className="chat-history">
+                                                <ul className="m-b-0 chat-list-container">
+                                                    {messages?.map(currentMessage => {
+                                                        return (currentMessage.sender == user.id
+                                                            ?
+                                                            <li className="clearfix active">
+                                                                <div className="message other-message float-right"> {currentMessage.message} </div>
+                                                            </li>
+                                                            :
+                                                            <li classname="clearfix">
+                                                                <div className="message my-message"><FontAwesomeIcon icon={faUser} /> { currentMessage.senderName}: <br/>{currentMessage.message}</div>
+                                                            </li>);
+                                                    })}
+                                                </ul>
+                                            </div>
+                                            <div className="chat-message clearfix">
+                                                <div className="input-group mb-0">
+                                                    <input type="text"
+                                                        className="form-control"
+                                                        placeholder="Digite a mensagem"
+                                                        value={sendMessage}
+                                                        onChange={(e) => setSendMessage(e.target.value)} />
+                                                    <div className="input-group-prepend">
+                                                        <button type="button" onClick={onClickSendMessage} className="btn btn-lg btn-primary btn-send"><FontAwesomeIcon icon={faPaperPlane} /></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {isOwner ? <button className="btn btn-lg btn-success" onClick={() => { onClickStartMatch() }}><FontAwesomeIcon icon={faPlay} /> Iniciar Partida</button> : ''}
+                        <br/>
+                        <br/>
                     </section>
                 </>
             }

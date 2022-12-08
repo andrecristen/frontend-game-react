@@ -10,6 +10,7 @@ import HomePage from "../pages/HomePage";
 import ProfilePage from "../pages/ProfilePage";
 import RoomCreatePage from "../pages/RoomCreatePage";
 import RoomWaitPage from "../pages/RoomWaitPage";
+import MatchPage from "../pages/MatchPage";
 
 import { AuthProvider } from "../contexts/auth"
 
@@ -27,6 +28,7 @@ const AppRoutes = () => {
                     <Route exact path="/profile" element={<PrivateContainer><ProfilePage /></PrivateContainer>}></Route>
                     <Route exact path="/room-create" element={<PrivateContainer><RoomCreatePage /></PrivateContainer>}></Route>
                     <Route exact path="/room-wait" element={<PrivateContainer><RoomWaitPage /></PrivateContainer>}></Route>
+                    <Route exact path="/match" element={<PrivateContainer><MatchPage /></PrivateContainer>}></Route>
                 </Routes>
             </AuthProvider>
         </Router>
