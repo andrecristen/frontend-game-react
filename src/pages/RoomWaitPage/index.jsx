@@ -15,28 +15,28 @@ const RoomWaitPage = function () {
 
     let navigate = useNavigate();
 
+    const { user, room, socketUrl, getUsersRoom, enterRoom, exitRoom, sendRemoveUserRoom, getRoom } = useContext(AuthContext);
+
     const [loadingUsers, setLoadingUsers] = useState(true);
     const [connecting, setConnecting] = useState(true);
     const [userList, setUserList] = useState([]);
     const [webSocket, setWebSocket] = useState(null);
     const [messages, setMessages] = useState([]);
     const [sendMessage, setSendMessage] = useState(null);
+    const [curretRoom, setCurrentRoom] = useState(room);
 
-    const { user, room, socketUrl, getUsersRoom, enterRoom, exitRoom, sendRemoveUserRoom } = useContext(AuthContext);
-
-    const roomId = room && room.id ? room.id : null;
-    let isOwner = (room && room.owner == user.id);
+    const roomId = curretRoom && curretRoom.id ? curretRoom.id : null;
+    let isOwner = (curretRoom && curretRoom.owner == user.id);
     let lastUserListLoaded = [];
 
     useEffect(() => {
-        isOwner = (room && room.owner == user.id);
         if (!webSocket) {
             var wsUrl = socketUrl() + "/ws/room/" + roomId + "/" + user.id + "/";
 
             let ws = new WebSocket(wsUrl);
             ws.onopen = (event) => {
                 console.log(event, "Conexão Aberta");
-                enterRoom(room).then((success) => {
+                enterRoom(curretRoom).then((success) => {
                     if (!success) {
                         onClickExit();
                     } else {
@@ -61,7 +61,7 @@ const RoomWaitPage = function () {
                         case "new_player":
                         case "disconnected_player":
                             setTimeout(() => {
-                                loadUsers();
+                                reloadRoom();
                             }, 1000);
                             break;
                         case "remove_player":
@@ -111,17 +111,20 @@ const RoomWaitPage = function () {
 
     const validateConnection = async () => {
         try {
-            let response = await loadUsers();
-            if (response) {
-                var stayConnected = lastUserListLoaded.some(userComparation => userComparation.id == user.id);
-                if (!stayConnected) {
-                    webSocket.close();
-                    if (user) {
-                        toast.info("Você foi removido da sala.", {
-                            position: toast.POSITION.TOP_CENTER
-                        });
+            let successReload = await reloadRoom();
+            if (successReload) {
+                let response = await loadUsers();
+                if (response) {
+                    var stayConnected = lastUserListLoaded.some(userComparation => userComparation.id == user.id);
+                    if (!stayConnected) {
+                        webSocket.close();
+                        if (user) {
+                            toast.info("Você foi removido da sala.", {
+                                position: toast.POSITION.TOP_CENTER
+                            });
+                        }
+                        navigate("/");
                     }
-                    navigate("/");
                 }
             }
         } catch (exception) {
@@ -130,10 +133,11 @@ const RoomWaitPage = function () {
 
     }
 
+
     const loadUsers = async () => {
         try {
             setLoadingUsers(true);
-            let data = await getUsersRoom(room)
+            let data = await getUsersRoom(curretRoom)
             setUserList(data.users);
             lastUserListLoaded = data.users;
             setLoadingUsers(false);
@@ -144,6 +148,21 @@ const RoomWaitPage = function () {
             toast.error("Erro ao carregar usuários da sala, tente novamente.", {
                 position: toast.POSITION.TOP_CENTER
             });
+            return false;
+        }
+    }
+
+    const reloadRoom = async () => {
+        try {
+            let successLoadUser = await loadUsers();
+            if (successLoadUser) {
+                let dataRoom = await getRoom(curretRoom.id);
+                if (dataRoom) {
+                    setCurrentRoom(dataRoom);
+                }
+            }
+            return true;
+        } catch (exception) {
             return false;
         }
     }
@@ -172,7 +191,7 @@ const RoomWaitPage = function () {
 
     const onClickRemovePlayer = async (currentUser) => {
         try {
-            let response = await sendRemoveUserRoom(room, currentUser);
+            let response = await sendRemoveUserRoom(curretRoom, currentUser);
             if (response) {
                 toast.success("Sucesso ao remover usuário.", {
                     position: toast.POSITION.TOP_CENTER
@@ -243,8 +262,8 @@ const RoomWaitPage = function () {
                                     <div className="user-item">
                                         <div className="col-11 user-item-infos">
                                             <span className="icon-status" title={currentUser.status}>{currentUser.status == "Online" ? <FontAwesomeIcon icon={faCircle} className="online" /> : <FontAwesomeIcon icon={faCircle} className="offline" />}</span>
-                                            <span>{currentUser.name}</span>
-                                            <span className="icon-owner">{room.owner == currentUser.id ? <FontAwesomeIcon title="Dono da sala" icon={faCrown} /> : ""}</span>
+                                            <span>{currentUser.id == user.id ? "*" : ""} {currentUser.name}</span>
+                                            <span className="icon-owner">{curretRoom.owner == currentUser.id ? <FontAwesomeIcon title="Dono da sala" icon={faCrown} /> : ""}</span>
                                         </div>
                                         <div className="col-1">
                                             {isOwner && currentUser.id != user.id ? <button title="Remover usuário da sala" onClick={() => { onClickRemovePlayer(currentUser) }} className="btn btn-sm btn-danger"><FontAwesomeIcon icon={faBan} /></button> : ""}
