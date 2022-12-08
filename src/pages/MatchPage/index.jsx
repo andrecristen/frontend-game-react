@@ -15,24 +15,56 @@ const MatchPage = function () {
 
     let navigate = useNavigate();
 
-    const [loadingUsers, setLoadingUsers] = useState(true);
-    const [connecting, setConnecting] = useState(true);
-    const [userList, setUserList] = useState([]);
+    const [loadingBoard, setLoadingBoard] = useState(true);
+    const [tableData, setTableData] = useState([]);
 
-    const { user, room } = useContext(AuthContext);
-
-    const roomId = room && room.id ? room.id : null;
-    let isOwner = (room && room.owner == user.id);
-    let lastUserListLoaded = [];
-    let webSocket;
+    const { user, room, findBoardRoom } = useContext(AuthContext);
 
     useEffect(() => {
-
+        findBoardRoom(room).then((board) => {
+            let tableDataAux = [];
+            for (let line = 0; line < board.lines; line++) {
+                let columnsData = [];
+                for (let column = 0; column < board.columns; column++) {
+                    columnsData.push({});
+                }
+                tableDataAux.push(columnsData);
+            }
+            setTableData(tableDataAux);
+            setLoadingBoard(false);
+        }).catch(() => {
+            toast.error("Erro ao carregar partida, tente novamente.", {
+                position: toast.POSITION.TOP_CENTER
+            });
+        });
     }, []);
 
     return (
         <div>
-
+            {
+                loadingBoard
+                    ?
+                    <h1>
+                        < FontAwesomeIcon icon={faSpinner} spin /> Carregando partida
+                    </h1 >
+                    :
+                    <div className="container">
+                        <h2>Mapa Partida #{room.id}</h2>
+                        <div className="table-responsive">
+                            <table className="table table-bordered table-sm table-striped m-10px">
+                                <tbody>
+                                    {tableData.map((columnData) => (
+                                        <tr>
+                                            {columnData.map((column => (
+                                                <td className="cell">&nbsp;</td>
+                                            )))}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+            }
         </div>
     );
 }

@@ -96,3 +96,24 @@ export const usersRoom = async (room) => {
             return error.response;
         });
 }
+
+export const getBoard = async (boardId) => {
+    return api.get('/api/v1/board/' + boardId + '/')
+        .then((result) => {
+            return result;
+        })
+        .catch((error) => {
+            return error.response;
+        });
+}
+
+export const getBoardList = async () => {
+    return api.get('/api/v1/board/')
+        .then((result) => {
+            return result;
+        })
+        .catch((error) => {
+            return error.response;
+        });
+}
+

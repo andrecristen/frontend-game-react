@@ -3,7 +3,7 @@ import React, { useState, useEffect, createContext } from "react";
 import { useNavigate } from "react-router-dom"
 import { toast } from 'react-toastify';
 
-import { URL_API, URL_WS, api, auth, create, listRoom, findRoom, usersRoom, createRoom, editRoom, addUserRoom, removeUserRoom } from "../services/api"
+import { URL_API, URL_WS, api, auth, create, listRoom, findRoom, usersRoom, createRoom, editRoom, addUserRoom, removeUserRoom, getBoard, getBoardList } from "../services/api"
 
 export const AuthContext = createContext();
 
@@ -174,6 +174,26 @@ export const AuthProvider = ({ children }) => {
         }
     }
 
+    const findBoardRoom = async (room) => {
+        const response = await getBoard(room.board);
+        if (response.status == 200 || response.status == 201) {
+            return response.data;
+        } else {
+            return {};
+        }
+    }
+
+    const listBoards = async () => {
+        const response = await getBoardList();
+        if (response.status == 200 || response.status == 201) {
+            return response.data;
+        } else {
+            return {};
+        }
+    }
+
+
+
     return (
         <AuthContext.Provider
             value={{
@@ -198,6 +218,8 @@ export const AuthProvider = ({ children }) => {
                 enterRoom,
                 exitRoom,
                 sendRemoveUserRoom,
+                findBoardRoom,
+                listBoards,
             }}>
             {children}
         </AuthContext.Provider>
